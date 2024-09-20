@@ -94,10 +94,12 @@ void handle_request(http::request<http::string_body>&& req, std::shared_ptr<tcp:
         res->set(http::field::content_type, "text/plain");
         res->body() = "Unsupported HTTP method";
     }
-    std::cout << "获取到请求：" << req.target() << std::endl;
-    std::string rsdata = urlControl(req.target(), req.body());
-    if (rsdata != "") {
-        res->body() = rsdata;
+    if (req.target()!="/favicon.ico") {
+        std::cout << "获取到请求：" << req.target() << std::endl;
+        std::string rsdata = urlControl(req.target(), req.body());
+        if (rsdata != "") {
+            res->body() = rsdata;
+        }
     }
     res->prepare_payload();
 
@@ -141,14 +143,10 @@ void do_accept(tcp::acceptor& acceptor, net::thread_pool& pool) {
         });
 }
 
-void setUnbuffered(std::ostream& os) {
-    os.setf(std::ios::unitbuf);
-}
 
 int main() {
     try {
-        setUnbuffered(std::cout);
-        std::setvbuf(stdout, nullptr, _IONBF, 0);
+        setvbuf(stdout, NULL, _IONBF, 0);
         const unsigned int num_threads = std::thread::hardware_concurrency();
         net::io_context ioc;
         net::thread_pool pool(num_threads);
