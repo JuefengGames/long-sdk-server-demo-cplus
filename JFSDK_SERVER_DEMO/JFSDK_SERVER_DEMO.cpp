@@ -83,11 +83,11 @@ void handle_request(http::request<http::string_body>&& req, std::shared_ptr<tcp:
     // 处理不同方法的请求
     if (req.method() == http::verb::get) {
         res->set(http::field::content_type, "text/html");
-        res->body() = "Get received";
+        res->body() = " The path of this get method is invalid";
     }
     else if (req.method() == http::verb::post) {
         res->set(http::field::content_type, "text/plain");
-        res->body() = "Post received";
+        res->body() = "The path of this post method is invalid";
     }
     else {
         *res = http::response<http::string_body>{ http::status::bad_request, req.version() };
@@ -146,6 +146,15 @@ void do_accept(tcp::acceptor& acceptor, net::thread_pool& pool) {
 
 int main() {
     try {
+        //修改窗口属性 控制台阻塞主进程解决办法
+        HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+        DWORD mode;
+        GetConsoleMode(hStdin, &mode);
+        mode &= ~ENABLE_QUICK_EDIT_MODE;  //移除快速编辑模式
+        mode &= ~ENABLE_INSERT_MODE;      //移除插入模式
+        mode &= ~ENABLE_MOUSE_INPUT;
+        SetConsoleMode(hStdin, mode);
+        //设置cout缓冲区为0避免阻塞
         setvbuf(stdout, NULL, _IONBF, 0);
         const unsigned int num_threads = std::thread::hardware_concurrency();
         net::io_context ioc;
